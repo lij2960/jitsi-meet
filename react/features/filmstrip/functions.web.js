@@ -32,10 +32,6 @@ export function isFilmstripVisible(stateful: Object | Function) {
  * in the filmstrip, then {@code true}; otherwise, {@code false}.
  */
 export function shouldRemoteVideosBeVisible(state: Object) {
-    if (state['features/invite'].calleeInfoVisible) {
-        return false;
-    }
-
     const participantCount = getParticipantCount(state);
     let pinnedParticipant;
 

@@ -65,8 +65,7 @@ function _connectionDisconnected(
 
     return assign(state, {
         connecting: undefined,
-        connection: undefined,
-        timeEstablished: undefined
+        connection: undefined
     });
 }
 
@@ -82,16 +81,12 @@ function _connectionDisconnected(
  */
 function _connectionEstablished(
         state: Object,
-        { connection, timeEstablished }: {
-            connection: Object,
-            timeEstablished: number
-        }) {
+        { connection }: { connection: Object }) {
     return assign(state, {
         connecting: undefined,
         connection,
         error: undefined,
-        passwordRequired: undefined,
-        timeEstablished
+        passwordRequired: undefined
     });
 }
 
@@ -148,8 +143,7 @@ function _connectionWillConnect(
         // done before the new one is established.
         connection: undefined,
         error: undefined,
-        passwordRequired: undefined,
-        timeEstablished: undefined
+        passwordRequired: undefined
     });
 }
 

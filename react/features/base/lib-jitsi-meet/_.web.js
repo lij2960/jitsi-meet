@@ -1,4 +1,7 @@
-// @flow
+/* @flow */
+
+// Polyfill URL for Internet Explorer.
+import 'url-polyfill';
 
 declare var JitsiMeetJS: Object;
 

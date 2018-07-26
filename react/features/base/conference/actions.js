@@ -54,6 +54,7 @@ import {
     getCurrentConference,
     sendLocalParticipant
 } from './functions';
+
 import type { Dispatch } from 'redux';
 
 const logger = require('jitsi-meet-logger').getLogger(__filename);
@@ -143,7 +144,6 @@ function _addConferenceListeners(conference, dispatch) {
     conference.on(
         JitsiConferenceEvents.USER_JOINED,
         (id, user) => !user.isHidden() && dispatch(participantJoined({
-            botType: user.getBotType(),
             conference,
             id,
             name: user.getDisplayName(),
@@ -160,14 +160,6 @@ function _addConferenceListeners(conference, dispatch) {
     conference.on(
         JitsiConferenceEvents.USER_STATUS_CHANGED,
         (...args) => dispatch(participantPresenceChanged(...args)));
-
-    conference.on(
-        JitsiConferenceEvents.BOT_TYPE_CHANGED,
-        (id, botType) => dispatch(participantUpdated({
-            conference,
-            id,
-            botType
-        })));
 
     conference.addCommandListener(
         AVATAR_ID_COMMAND,

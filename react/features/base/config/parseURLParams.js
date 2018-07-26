@@ -1,7 +1,5 @@
 /* @flow */
 
-import { reportError } from '../util';
-
 /**
  * Parses the query/search or fragment/hash parameters out of a specific URL and
  * returns them as a JS object.
@@ -38,8 +36,10 @@ export default function parseURLParams(
                     = JSON.parse(decodeURIComponent(value).replace(/\\&/, '&'));
             }
         } catch (e) {
-            reportError(
-                e, `Failed to parse URL parameter value: ${String(value)}`);
+            const msg = `Failed to parse URL parameter value: ${String(value)}`;
+
+            console.warn(msg, e);
+            window.onerror && window.onerror(msg, null, null, null, e);
 
             return;
         }

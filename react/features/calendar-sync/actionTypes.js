@@ -5,8 +5,7 @@
  *
  * {
  *     type: REFRESH_CALENDAR,
- *     forcePermission: boolean,
- *     isInteractive: boolean
+ *     forcePermission: boolean
  * }
  */
 export const REFRESH_CALENDAR = Symbol('REFRESH_CALENDAR');

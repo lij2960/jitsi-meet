@@ -45,7 +45,7 @@ type Props = AbstractButtonProps & {
  * @private
  * @type {boolean}
  */
-const _SHARE_ROOM_TOOLBAR_BUTTON = true;
+const _SHARE_ROOM_TOOLBAR_BUTTON = false;
 
 /**
  * Implements an {@link AbstractButton} to enter add/invite people to the

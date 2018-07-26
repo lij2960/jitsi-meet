@@ -82,7 +82,7 @@ export default class AbstractPagedList extends Component<Props, State> {
      * @inheritdoc
      */
     componentDidMount() {
-        this._maybeRefreshSelectedPage(false);
+        this._maybeRefreshSelectedPage();
     }
 
     /**
@@ -118,7 +118,7 @@ export default class AbstractPagedList extends Component<Props, State> {
         );
     }
 
-    _maybeRefreshSelectedPage: ?boolean => void;
+    _maybeRefreshSelectedPage: () => void;
 
     /**
      * Components that this PagedList displays may have a refresh function to
@@ -126,11 +126,9 @@ export default class AbstractPagedList extends Component<Props, State> {
      * function invokes this logic if it's present.
      *
      * @private
-     * @param {boolean} isInteractive - If true this refresh was caused by
-     * direct user interaction, false otherwise.
      * @returns {void}
      */
-    _maybeRefreshSelectedPage(isInteractive: boolean = true) {
+    _maybeRefreshSelectedPage() {
         const selectedPage = this.props.pages[this.state.pageIndex];
         let component;
 
@@ -138,7 +136,7 @@ export default class AbstractPagedList extends Component<Props, State> {
             const { refresh } = component;
 
             typeof refresh === 'function'
-                && refresh.call(component, this.props.dispatch, isInteractive);
+                && refresh.call(component, this.props.dispatch);
         }
     }
 

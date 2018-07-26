@@ -4,12 +4,11 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect as reactReduxConnect } from 'react-redux';
 
-import { obtainConfig } from '../../base/config';
 import { connect, disconnect } from '../../base/connection';
 import { DialogContainer } from '../../base/dialog';
 import { translate } from '../../base/i18n';
+import { CalleeInfoContainer } from '../../base/jwt';
 import { Filmstrip } from '../../filmstrip';
-import { CalleeInfoContainer } from '../../invite';
 import { LargeVideo } from '../../large-video';
 import { NotificationsContainer } from '../../notifications';
 import { SidePanel } from '../../side-panel';
@@ -23,10 +22,7 @@ import {
 import { maybeShowSuboptimalExperienceNotification } from '../functions';
 
 declare var APP: Object;
-declare var config: Object;
 declare var interfaceConfig: Object;
-
-const logger = require('jitsi-meet-logger').getLogger(__filename);
 
 /**
  * DOM events for when full screen mode has changed. Different browsers need
@@ -50,11 +46,6 @@ type Props = {
      * Whether the local participant is recording the conference.
      */
     _iAmRecorder: boolean,
-
-    /**
-     * Conference room name.
-     */
-    _room: string,
 
     dispatch: Function,
     t: Function
@@ -93,35 +84,29 @@ class Conference extends Component<Props> {
     }
 
     /**
-     * Start the connection and get the UI ready for the conference.
+     * Until we don't rewrite UI using react components
+     * we use UI.start from old app. Also method translates
+     * component right after it has been mounted.
      *
      * @inheritdoc
      */
     componentDidMount() {
-        const { configLocation } = config;
+        APP.UI.start();
 
-        if (configLocation) {
-            obtainConfig(configLocation, this.props._room)
-                .then(() => {
-                    const now = window.performance.now();
+        APP.UI.registerListeners();
+        APP.UI.bindEvents();
 
-                    APP.connectionTimes['configuration.fetched'] = now;
-                    logger.log('(TIME) configuration fetched:\t', now);
+        FULL_SCREEN_EVENTS.forEach(name =>
+            document.addEventListener(name, this._onFullScreenChange));
 
-                    this._start();
-                })
-                .catch(err => {
-                    logger.log(err);
+        const { dispatch, t } = this.props;
 
-                    // Show obtain config error.
-                    APP.UI.messageHandler.showError({
-                        descriptionKey: 'dialog.connectError',
-                        titleKey: 'connection.CONNFAIL'
-                    });
-                });
-        } else {
-            this._start();
-        }
+        dispatch(connect());
+
+        maybeShowSuboptimalExperienceNotification(dispatch, t);
+
+        interfaceConfig.filmStripOnly
+            && dispatch(setToolboxAlwaysVisible(true));
     }
 
     /**
@@ -200,32 +185,6 @@ class Conference extends Component<Props> {
     _onShowToolbar() {
         this.props.dispatch(showToolbox());
     }
-
-    /**
-     * Until we don't rewrite UI using react components
-     * we use UI.start from old app. Also method translates
-     * component right after it has been mounted.
-     *
-     * @inheritdoc
-     */
-    _start() {
-        APP.UI.start();
-
-        APP.UI.registerListeners();
-        APP.UI.bindEvents();
-
-        FULL_SCREEN_EVENTS.forEach(name =>
-            document.addEventListener(name, this._onFullScreenChange));
-
-        const { dispatch, t } = this.props;
-
-        dispatch(connect());
-
-        maybeShowSuboptimalExperienceNotification(dispatch, t);
-
-        interfaceConfig.filmStripOnly
-            && dispatch(setToolboxAlwaysVisible(true));
-    }
 }
 
 /**
@@ -235,12 +194,10 @@ class Conference extends Component<Props> {
  * @param {Object} state - The Redux state.
  * @private
  * @returns {{
- *     _iAmRecorder: boolean,
- *     _room: ?string
+ *     _iAmRecorder: boolean
  * }}
  */
 function _mapStateToProps(state) {
-    const { room } = state['features/base/conference'];
     const { iAmRecorder } = state['features/base/config'];
 
     return {
@@ -249,12 +206,7 @@ function _mapStateToProps(state) {
          *
          * @private
          */
-        _iAmRecorder: iAmRecorder,
-
-        /**
-         * Conference room name.
-         */
-        _room: room
+        _iAmRecorder: iAmRecorder
     };
 }
 

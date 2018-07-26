@@ -3,16 +3,20 @@
 import { SET_ROOM } from '../base/conference';
 import {
     CONNECTION_ESTABLISHED,
-    getURLWithoutParams
+    getURLWithoutParams,
+    SET_LOCATION_URL
 } from '../base/connection';
 import { MiddlewareRegistry } from '../base/redux';
 
-import { _getRouteToRender } from './getRouteToRender';
+import { _getRouteToRender } from './functions';
 
 MiddlewareRegistry.register(store => next => action => {
     switch (action.type) {
     case CONNECTION_ESTABLISHED:
         return _connectionEstablished(store, next, action);
+
+    case SET_LOCATION_URL:
+        return _setLocationURL(store, next, action);
 
     case SET_ROOM:
         return _setRoom(store, next, action);
@@ -72,9 +76,41 @@ function _connectionEstablished(store, next, action) {
  */
 function _navigate({ getState }) {
     const state = getState();
-    const { app } = state['features/base/app'];
+    const { app } = state['features/app'];
+    const routeToRender = _getRouteToRender(state);
 
-    _getRouteToRender(state).then(route => app._navigate(route));
+    // XXX Web changed _getRouteToRender to return Promsie instead of Route.
+    // Unfortunately, the commit left mobile to return Route.
+    let routeToRenderPromise;
+
+    if (routeToRender && typeof routeToRender.then === 'function') {
+        routeToRenderPromise = routeToRender;
+    }
+    if (!routeToRenderPromise) {
+        routeToRenderPromise = Promise.resolve(routeToRender);
+    }
+
+    routeToRenderPromise.then(app._navigate.bind(app));
+}
+
+/**
+ * Notifies the feature app that the action {@link SET_LOCATION_URL} is being
+ * dispatched within a specific redux {@code store}.
+ *
+ * @param {Store} store - The redux store in which the specified {@code action}
+ * is being dispatched.
+ * @param {Dispatch} next - The redux {@code dispatch} function to dispatch the
+ * specified {@code action} to the specified {@code store}.
+ * @param {Action} action - The redux action, {@code SET_LOCATION_URL}, which is
+ * being dispatched in the specified {@code store}.
+ * @private
+ * @returns {Object} The new state that is the result of the reduction of the
+ * specified {@code action}.
+ */
+function _setLocationURL({ getState }, next, action) {
+    return (
+        getState()['features/app'].app._navigate(undefined)
+            .then(() => next(action)));
 }
 
 /**

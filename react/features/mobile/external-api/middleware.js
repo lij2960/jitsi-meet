@@ -1,5 +1,8 @@
 // @flow
 
+import { NativeModules } from 'react-native';
+
+import { getAppProp } from '../../app';
 import {
     CONFERENCE_FAILED,
     CONFERENCE_JOINED,
@@ -14,10 +17,8 @@ import {
 import { LOAD_CONFIG_ERROR } from '../../base/config';
 import { CONNECTION_FAILED } from '../../base/connection';
 import { MiddlewareRegistry } from '../../base/redux';
-import { getSymbolDescription, toURLString } from '../../base/util';
+import { toURLString } from '../../base/util';
 import { ENTER_PICTURE_IN_PICTURE } from '../picture-in-picture';
-
-import { sendEvent } from './functions';
 
 /**
  * Middleware that captures Redux actions and uses the ExternalAPI module to
@@ -65,15 +66,15 @@ MiddlewareRegistry.register(store => next => action => {
         break;
 
     case ENTER_PICTURE_IN_PICTURE:
-        sendEvent(store, getSymbolDescription(type), /* data */ {});
+        _sendEvent(store, _getSymbolDescription(type), /* data */ {});
         break;
 
     case LOAD_CONFIG_ERROR: {
         const { error, locationURL } = action;
 
-        sendEvent(
+        _sendEvent(
             store,
-            getSymbolDescription(type),
+            _getSymbolDescription(type),
             /* data */ {
                 error: _toErrorString(error),
                 url: toURLString(locationURL)
@@ -110,6 +111,29 @@ function _toErrorString(
 }
 
 /**
+ * Gets the description of a specific {@code Symbol}.
+ *
+ * @param {Symbol} symbol - The {@code Symbol} to retrieve the description of.
+ * @private
+ * @returns {string} The description of {@code symbol}.
+ */
+function _getSymbolDescription(symbol: Symbol) {
+    let description = symbol.toString();
+
+    if (description.startsWith('Symbol(') && description.endsWith(')')) {
+        description = description.slice(7, -1);
+    }
+
+    // The polyfill es6-symbol that we use does not appear to comply with the
+    // Symbol standard and, merely, adds @@ at the beginning of the description.
+    if (description.startsWith('@@')) {
+        description = description.slice(2);
+    }
+
+    return description;
+}
+
+/**
  * If {@link SET_ROOM} action happens for a valid conference room this method
  * will emit an early {@link CONFERENCE_WILL_JOIN} event to let the external API
  * know that a conference is being joined. Before that happens a connection must
@@ -127,9 +151,9 @@ function _maybeTriggerEarlyConferenceWillJoin(store, action) {
     const { locationURL } = store.getState()['features/base/connection'];
     const { room } = action;
 
-    isRoomValid(room) && locationURL && sendEvent(
+    isRoomValid(room) && locationURL && _sendEvent(
         store,
-        getSymbolDescription(CONFERENCE_WILL_JOIN),
+        _getSymbolDescription(CONFERENCE_WILL_JOIN),
         /* data */ {
             url: toURLString(locationURL)
         });
@@ -160,7 +184,7 @@ function _sendConferenceEvent(
     }
 
     _swallowEvent(store, action, data)
-        || sendEvent(store, getSymbolDescription(type), data);
+        || _sendEvent(store, _getSymbolDescription(type), data);
 }
 
 /**
@@ -184,13 +208,35 @@ function _sendConferenceFailedOnConnectionError(store, action) {
             // If there's any conference in the  base/conference state then the
             // base/conference feature is supposed to emit a failure.
             conference => conference.getConnection() !== connection)
-        && sendEvent(
+        && _sendEvent(
         store,
-        getSymbolDescription(CONFERENCE_FAILED),
+        _getSymbolDescription(CONFERENCE_FAILED),
         /* data */ {
             url: toURLString(locationURL),
             error: action.error.name
         });
+}
+
+/**
+ * Sends a specific event to the native counterpart of the External API. Native
+ * apps may listen to such events via the mechanisms provided by the (native)
+ * mobile Jitsi Meet SDK.
+ *
+ * @param {Object} store - The redux store.
+ * @param {string} name - The name of the event to send.
+ * @param {Object} data - The details/specifics of the event to send determined
+ * by/associated with the specified {@code name}.
+ * @private
+ * @returns {void}
+ */
+function _sendEvent(store: Object, name: string, data: Object) {
+    // The JavaScript App needs to provide uniquely identifying information to
+    // the native ExternalAPI module so that the latter may match the former to
+    // the native JitsiMeetView which hosts it.
+    const externalAPIScope = getAppProp(store, 'externalAPIScope');
+
+    externalAPIScope
+        && NativeModules.ExternalAPI.sendEvent(name, data, externalAPIScope);
 }
 
 /**

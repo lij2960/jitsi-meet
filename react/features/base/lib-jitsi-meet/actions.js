@@ -7,8 +7,10 @@ import {
     LIB_DID_DISPOSE,
     LIB_DID_INIT,
     LIB_INIT_ERROR,
+    LIB_INIT_PROMISE_CREATED,
     LIB_WILL_DISPOSE,
-    LIB_WILL_INIT
+    LIB_WILL_INIT,
+    SET_WEBRTC_READY
 } from './actionTypes';
 import { isAnalyticsEnabled } from './functions';
 
@@ -36,7 +38,7 @@ export function disposeLib() {
  * @returns {Function}
  */
 export function initLib() {
-    return (dispatch: Dispatch<*>, getState: Function): void => {
+    return (dispatch: Dispatch<*>, getState: Function): Promise<void> => {
         const config = getState()['features/base/config'];
 
         if (!config) {
@@ -45,15 +47,30 @@ export function initLib() {
 
         dispatch({ type: LIB_WILL_INIT });
 
-        try {
-            JitsiMeetJS.init({
-                enableAnalyticsLogging: isAnalyticsEnabled(getState),
-                ...config
-            });
-            dispatch({ type: LIB_DID_INIT });
-        } catch (error) {
-            dispatch(libInitError(error));
-        }
+        const initPromise = JitsiMeetJS.init({
+            enableAnalyticsLogging: isAnalyticsEnabled(getState),
+            ...config
+        });
+
+        dispatch({
+            type: LIB_INIT_PROMISE_CREATED,
+            initPromise
+        });
+
+        return (
+            initPromise
+                .then(() => dispatch({ type: LIB_DID_INIT }))
+                .catch(error => {
+                    // TODO: See the comment in the connect action in
+                    // base/connection/actions.web.js.
+                    if (typeof APP === 'undefined') {
+                        dispatch(libInitError(error));
+                    }
+
+                    // TODO Handle LIB_INIT_ERROR error somewhere instead.
+                    console.error('lib-jitsi-meet failed to init:', error);
+                    throw error;
+                }));
     };
 }
 
@@ -70,5 +87,24 @@ export function libInitError(error: Error) {
     return {
         type: LIB_INIT_ERROR,
         error
+    };
+}
+
+/**
+ * Sets the indicator which determines whether WebRTC is ready.
+ *
+ * @param {boolean} webRTCReady - The indicator which determines
+ * whether WebRTC is ready.
+ * @returns {Function}
+ */
+export function setWebRTCReady(webRTCReady: boolean) {
+    return (dispatch: Function, getState: Function) => {
+        if (getState()['features/base/lib-jitsi-meet'].webRTCReady
+                !== webRTCReady) {
+            dispatch({
+                type: SET_WEBRTC_READY,
+                webRTCReady
+            });
+        }
     };
 }

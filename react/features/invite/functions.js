@@ -1,6 +1,6 @@
 // @flow
 
-import { getAppProp } from '../base/app';
+import { getAppProp } from '../app';
 import { isLocalParticipantModerator } from '../base/participants';
 import { doGetJSON } from '../base/util';
 

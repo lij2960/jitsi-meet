@@ -180,7 +180,6 @@ function _participant(state: Object = {}, action) {
 function _participantJoined({ participant }) {
     const {
         avatarURL,
-        botType,
         connectionStatus,
         dominantSpeaker,
         email,
@@ -213,7 +212,6 @@ function _participantJoined({ participant }) {
     return {
         avatarID,
         avatarURL,
-        botType,
         conference,
         connectionStatus,
         dominantSpeaker: dominantSpeaker || false,

@@ -1,8 +1,4 @@
-export {
-    LiveStreamButton,
-    StartLiveStreamDialog,
-    StopLiveStreamDialog
-} from './LiveStream';
+export { StartLiveStreamDialog, StopLiveStreamDialog } from './LiveStream';
 export {
     RecordButton,
     StartRecordingDialog,

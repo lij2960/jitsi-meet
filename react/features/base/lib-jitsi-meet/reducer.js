@@ -5,7 +5,9 @@ import { ReducerRegistry } from '../redux';
 import {
     LIB_DID_DISPOSE,
     LIB_DID_INIT,
-    LIB_INIT_ERROR
+    LIB_INIT_ERROR,
+    LIB_INIT_PROMISE_CREATED,
+    SET_WEBRTC_READY
 } from './actionTypes';
 
 /**
@@ -33,7 +35,20 @@ ReducerRegistry.register(
             return {
                 ...state,
                 initError: action.error,
-                initialized: false
+                initialized: false,
+                initPromise: undefined
+            };
+
+        case LIB_INIT_PROMISE_CREATED:
+            return {
+                ...state,
+                initPromise: action.initPromise
+            };
+
+        case SET_WEBRTC_READY:
+            return {
+                ...state,
+                webRTCReady: action.webRTCReady
             };
 
         default:

@@ -2,13 +2,13 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { connect } from 'react-redux';
 
-import { appNavigate, reloadNow } from '../../app';
+import { appNavigate } from '../../app';
 import { translate } from '../../base/i18n';
 import { LoadingIndicator } from '../../base/react';
 
 import AbstractPageReloadOverlay, { abstractMapStateToProps }
     from './AbstractPageReloadOverlay';
-import { setFatalError } from '../actions';
+import { _reloadNow, setFatalError } from '../actions';
 import OverlayFrame from './OverlayFrame';
 import { pageReloadOverlay as styles } from './styles';
 
@@ -55,7 +55,7 @@ class PageReloadOverlay extends AbstractPageReloadOverlay {
      */
     _onReloadNow() {
         clearInterval(this._interval);
-        this.props.dispatch(reloadNow());
+        this.props.dispatch(_reloadNow());
     }
 
     /**

@@ -3,8 +3,12 @@
 import uuid from 'uuid';
 
 import { createTrackMutedEvent, sendAnalytics } from '../../analytics';
-import { appNavigate, getName } from '../../app';
-import { APP_WILL_MOUNT, APP_WILL_UNMOUNT } from '../../base/app';
+import {
+    APP_WILL_MOUNT,
+    APP_WILL_UNMOUNT,
+    appNavigate,
+    getName
+} from '../../app';
 import {
     CONFERENCE_FAILED,
     CONFERENCE_LEFT,

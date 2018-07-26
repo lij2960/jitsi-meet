@@ -89,7 +89,7 @@ export function hideToolbox(force: boolean = false): Function {
 
         if (!force
                 && (hovered
-                    || state['features/invite'].calleeInfoVisible
+                    || state['features/base/jwt'].calleeInfoVisible
                     || SideContainerToggler.isVisible())) {
             dispatch(
                 setToolboxTimeout(
