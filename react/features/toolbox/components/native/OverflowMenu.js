@@ -68,7 +68,7 @@ class OverflowMenu extends Component<Props> {
                 <AudioRouteButton { ...buttonProps } />
                 <ToggleCameraButton { ...buttonProps } />
                 <AudioOnlyButton { ...buttonProps } />
-                <RoomLockButton { ...buttonProps } />
+                {/*<RoomLockButton { ...buttonProps } />*/}
                 {/*<RecordButton { ...buttonProps } />*/}
                 {/*<PictureInPictureButton { ...buttonProps } />*/}
             </BottomSheet>
