@@ -427,8 +427,10 @@
         "FETCH_SESSION_ID": "Obtaining session-id...",
         "GOT_SESSION_ID": "Obtaining session-id... Done",
         "GET_SESSION_ID_ERROR": "Get session-id error: __code__",
-        "USER_CONNECTION_INTERRUPTED": "__displayName__连接中断 ...",
-        "LOW_BANDWIDTH": "Video for __displayName__ has been turned off to save bandwidth"
+        //"USER_CONNECTION_INTERRUPTED": "__displayName__连接中断...",
+        //"LOW_BANDWIDTH": "__displayName__的本视频被关闭以节省带宽"
+        "USER_CONNECTION_INTERRUPTED": "本条视频连接中断...",
+        "LOW_BANDWIDTH": "本条视频被关闭以节省带宽"
 
     },
     "recording":
