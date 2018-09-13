@@ -11,8 +11,8 @@
     "audioDevices": {
         "bluetooth": "蓝牙",
         "headphones": "耳机",
-        "phone": "电话",
-        "speaker": "话筒"
+        "phone": "听筒",
+        "speaker": "扬声器"
     },
     "audioOnly": {
         "audioOnly": "Audio only",
